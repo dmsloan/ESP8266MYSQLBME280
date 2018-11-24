@@ -52,6 +52,30 @@ WiFiClient client;                 // Use this for WiFi instead of EthernetClien
 MySQL_Connection conn(&client);
 MySQL_Cursor* cursor;
 
+void connectWiFi()
+{
+  // Begin WiFi section
+  Serial.printf("\nConnecting to %s", ssid);
+  WiFi.begin(ssid, pass);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  // print out info about the connection:
+  Serial.println("\nConnected to network");
+  Serial.print("My IP address is: ");
+  Serial.println(WiFi.localIP());
+}
+
+void connectSQL()
+{
+  Serial.print("Connecting to SQL...  ");
+  if (conn.connect(server_addr, 3306, user, password))
+    Serial.println("OK.");
+  else
+    Serial.println("FAILED.");
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -67,24 +91,9 @@ void setup()
         while (1);
     }
 
-  // Begin WiFi section
-  Serial.printf("\nConnecting to %s", ssid);
-  WiFi.begin(ssid, pass);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
+  connectWiFi();
 
-  // print out info about the connection:
-  Serial.println("\nConnected to network");
-  Serial.print("My IP address is: ");
-  Serial.println(WiFi.localIP());
-
-  Serial.print("Connecting to SQL...  ");
-  if (conn.connect(server_addr, 3306, user, password))
-    Serial.println("OK.");
-  else
-    Serial.println("FAILED.");
+  connectSQL();
   
   // create MySQL cursor object
   cursor = new MySQL_Cursor(&conn);
@@ -92,8 +101,8 @@ void setup()
 
 void loop()
 {
-  if (conn.connected()){
-//    Serial.println(bme.readPressure() / 100.0F); //read pressure and divide by 100.0 floating point
+  if (conn.connected())
+  {
     pressure = bme.readPressure()*0.029529983071445; // to convert from pascals to inches of mercury divide by 0.00029529983071445
     temperature = ((bme.readTemperature()* 9/5) + 32)*100; // convert to farinheight and multiply by 100
     humidity = bme.readHumidity()*10; // multiply the humidity by 10 
@@ -111,7 +120,9 @@ void loop()
     // Note: since there are no results, we do not need to read any data
     // Deleting the cursor also frees up memory used
   }
-    
+  else
+  {
+  Serial.println("SQL connection dropped");
+  }  
   delay(delayTime);
-
 }
