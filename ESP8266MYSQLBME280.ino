@@ -97,21 +97,14 @@ void loop()
     pressure = bme.readPressure()*0.029529983071445; // to convert from pascals to inches of mercury divide by 0.00029529983071445
     temperature = ((bme.readTemperature()* 9/5) + 32)*100; // convert to farinheight and multiply by 100
     humidity = bme.readHumidity()*10; // multiply the humidity by 10 
-    Serial.println(pressure);
 
     MySQL_Cursor *cur_mem = new MySQL_Cursor(&conn);
     // Save
     //dtostrf(50.125, 1, 1, temperature);
     sprintf(query, INSERT_DATA, pressure, temperature, humidity);
-    Serial.print("Pressure: ");
-    Serial.print(pressure);
-    Serial.println("inHg");
-    Serial.print("Temperature: ");
-    Serial.print(temperature);
-    Serial.println("° F "); // insert the degre symbol by typing alt+0176
-    Serial.print("Humidity: ");
-    Serial.print(humidity);
-    Serial.println("%");
+    Serial.printf("Pressure: %.2finHg\n", pressure/100.0); // must use 100.0 so the result is a float
+    Serial.printf("Temperature: %.2f° F\n", temperature/100.0); // insert the degre symbol by typing alt+0176
+    Serial.printf("Humidity: %.1f%%\n", humidity/10.0); // add the %% to get the % to print
     Serial.println(query);
     // Execute the query
     cursor->execute(query);
