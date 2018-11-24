@@ -38,11 +38,11 @@ char user[] = "pi_insert";              // MySQL user login username
 char password[] = "raspberry";        // MySQL user login password
 
 // Sample query
-char INSERT_DATA[] = "INSERT INTO measurements.pressure (pressure, temperature, humidity) VALUES ('%f', %f, %f)";
+char INSERT_DATA[] = "INSERT INTO measurements.pressure (pressure, temperature, humidity) VALUES (%u, %u, %u)";
 char query[128];
-float pressure;
-float temperature;
-float humidity;
+unsigned int pressure; // the value is stored as an it to save space in the database. divide by 100 to get actual value
+unsigned int temperature; // the value is stored as an it to save space in the database. divide by 100 to get actual value
+unsigned int humidity; // the value is stored as an it to save space in the database. divide by 10 to get actual value
 
 // WiFi card example
 char ssid[] = "Sloan-Home";   // your SSID
@@ -94,19 +94,24 @@ void loop()
 {
   if (conn.connected()){
 //    Serial.println(bme.readPressure() / 100.0F); //read pressure and divide by 100.0 floating point
-    pressure = bme.readPressure();
-    temperature = (((bme.readTemperature()* 9/5) + 32)*100);
-    humidity = bme.readHumidity();
+    pressure = bme.readPressure()*0.029529983071445; // to convert from pascals to inches of mercury divide by 0.00029529983071445
+    temperature = ((bme.readTemperature()* 9/5) + 32)*100; // convert to farinheight and multiply by 100
+    humidity = bme.readHumidity()*10; // multiply the humidity by 10 
     Serial.println(pressure);
 
     MySQL_Cursor *cur_mem = new MySQL_Cursor(&conn);
     // Save
     //dtostrf(50.125, 1, 1, temperature);
     sprintf(query, INSERT_DATA, pressure, temperature, humidity);
-    Serial.println(pressure,6);
-    Serial.println(temperature,6);
-    Serial.println(humidity,6);
-    Serial.println(delayTime);
+    Serial.print("Pressure: ");
+    Serial.print(pressure);
+    Serial.println("inHg");
+    Serial.print("Temperature: ");
+    Serial.print(temperature);
+    Serial.println("° F "); // insert the degre symbol by typing alt+0176
+    Serial.print("Humidity: ");
+    Serial.print(humidity);
+    Serial.println("%");
     Serial.println(query);
     // Execute the query
     cursor->execute(query);
