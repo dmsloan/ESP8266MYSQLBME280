@@ -18,6 +18,8 @@
   Modified by: Derek
 */
 #include <ESP8266WiFi.h>           // Use this for WiFi instead of Ethernet.h
+//#include <WiFiInfo.h>              //TODO: this stores information and passwords for connetctions 
+
 #include <MySQL_Connection.h>
 #include <MySQL_Cursor.h>
 
@@ -31,17 +33,17 @@
 Adafruit_BME280 bme; // I2C
 
 // constants won't change:
-const unsigned short interval       = 1000;  // interval at which to blink (milliseconds)
-const unsigned short delayTime      = 10000; // interval between readings
-const unsigned short blinkTime      = 100;   // time for the led to be on
-const unsigned short blinkDelayTime = 1000;  // interval between blinks
+const unsigned short ledInterval    = 1000;  // interval at which to blink (milliseconds)
+const unsigned long readDelayTime   = 600000;// interval between readings (milliseconds) 600,000 equals 10 minutes
+const unsigned short ledBlinkTime   = 100;   // time for the led to be on (milliseconds)
+const unsigned short blinkDelayTime = 1000;  // interval between blinks (milliseconds)
 
 // Generally, you should use "unsigned long" for variables that hold time
 // The value will quickly become too large for an int to store
 unsigned short previousMillis = 0;   // store last time LED was updated
 bool ledState                 = LOW; // ledState used to set the LED
 
-IPAddress server_addr(192,168,0,18);  // IP of the MySQL *server* here
+IPAddress server_addr(192,168,0,85);  // IP of the MySQL *server* here
 char user[]     = "pi_insert";        // MySQL user login username
 char password[] = "raspberry";        // MySQL user login password
 
@@ -136,6 +138,9 @@ void loop()
   else
   {
   Serial.println("SQL connection dropped");
+  Serial.println("Attempting to reconnect");
+  connectWiFi();
+  connectSQL();
   }  
-  delay(delayTime);
+  delay(readDelayTime);
 }
