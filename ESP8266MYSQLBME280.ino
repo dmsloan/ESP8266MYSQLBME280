@@ -43,7 +43,7 @@ const unsigned short blinkDelayTime = 1000;  // interval between blinks (millise
 unsigned short previousMillis = 0;   // store last time LED was updated
 bool ledState                 = LOW; // ledState used to set the LED
 
-IPAddress server_addr(192,168,0,85);  // IP of the MySQL *server* here
+IPAddress server_addr(192,168,1,85);  // IP of the MySQL *server* here
 char user[]     = "pi_insert";        // MySQL user login username
 char password[] = "raspberry";        // MySQL user login password
 
